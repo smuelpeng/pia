@@ -1,0 +1,1 @@
+CFLAGS += -Wall -O3 -std=c99
