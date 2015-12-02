@@ -22,6 +22,6 @@ clean :
 	$(MAKE) -C doc clean
 
 scan-build :
-	scan-build -v -o /tmp make
+	scan-build -v -o /tmp $(MAKE)
 
 .PHONY : default test doc clean scan-build
