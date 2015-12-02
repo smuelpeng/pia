@@ -15,10 +15,10 @@
 
     http://www.cap-lore.com/MathPhys/IP/
 
-  and is clearly a master-work of algorithmics and coding. My original
-  intention was simply to convert it ANSI C, but I found that I needed
-  to reformat and "dumb it down" just so that I could understand what
-  it was that I was converting.
+  and is clearly a master-work of algorithmics and craftmanship. My
+  original intention was simply to convert it ANSI C, but I found that
+  I needed to reformat and "dumb it down" just so that I could
+  understand what it was that I was converting.
 
   The main changes are:
 
@@ -35,6 +35,8 @@
     intermediate calculation have been made explicit (these assumptions
     are true for gcc on x86, but are not guaranteed by standard and are
     false for gcc on amd64)
+  - use integer types with explict size from stdint.h, use size_t for
+    array indices, used booleans from stdbool.h
 
   This is now C99 (according to gcc -Wall -std=c99)
 
@@ -47,6 +49,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <float.h>
 
 typedef struct
@@ -130,9 +133,7 @@ static void fit(point_t *x, size_t cx,
 		float mid,
 		box_t B)
 {
-  int32_t c;
-
-  c = cx;
+  int32_t c = cx;
 
   while (c--)
     {
@@ -172,7 +173,7 @@ static void contrib(ipoint_t f, ipoint_t t, int16_t w, int64_t *s)
   *s += (int64_t)w*(t.x - f.x)*(t.y + f.y)/2;
 }
 
-static int ovl(rng_t p, rng_t q)
+static bool ovl(rng_t p, rng_t q)
 {
   return (p.mn < q.mx) && (q.mn < p.mx);
 }
@@ -191,12 +192,16 @@ void cross(vertex_t *a,
     r1 = a1/((float)a1 + a2),
     r2 = a3/((float)a3 + a4);
 
-  ipoint_t pA = {a->ip.x + r1*(b->ip.x - a->ip.x),
-		 a->ip.y + r1*(b->ip.y - a->ip.y)};
+  ipoint_t pA = {
+    a->ip.x + r1*(b->ip.x - a->ip.x),
+    a->ip.y + r1*(b->ip.y - a->ip.y)
+  };
   contrib(pA, b->ip, 1, s);
 
-  ipoint_t pB = {c->ip.x + r2*(d->ip.x - c->ip.x),
-		 c->ip.y + r2*(d->ip.y - c->ip.y)};
+  ipoint_t pB = {
+    c->ip.x + r2*(d->ip.x - c->ip.x),
+    c->ip.y + r2*(d->ip.y - c->ip.y)
+  };
   contrib(d->ip, pB, 1, s);
 
   ++a->in;
@@ -214,9 +219,11 @@ static void inness(vertex_t *P, size_t cP,
     {
       if ((Q[c].rx.mn < p.x) && (p.x < Q[c].rx.mx))
 	{
-	  int sgn = 0 < area(p, Q[c].ip, Q[c+1].ip);
+	  bool positive = (0 < area(p, Q[c].ip, Q[c+1].ip));
 
-	  S += ((sgn != (Q[c].ip.x < Q[c+1].ip.x)) ? 0 : (sgn ? -1 : 1));
+	  S += ((positive != (Q[c].ip.x < Q[c+1].ip.x)) ?
+		0 :
+		(positive ? -1 : 1));
 	}
     }
 
@@ -228,8 +235,8 @@ static void inness(vertex_t *P, size_t cP,
     }
 }
 
-extern float pia_area(point_t* a, size_t na,
-		      point_t* b, size_t nb)
+extern float pia_area(point_t *a, size_t na,
+		      point_t *b, size_t nb)
 {
   vertex_t ipa[na+1], ipb[nb+1];
   box_t B = {{ FLT_MAX,  FLT_MAX},
@@ -242,18 +249,17 @@ extern float pia_area(point_t* a, size_t na,
 
   const float
     gamut = 500000000.0,
-    mid   = gamut/2.0;
+    mid   = gamut / 2.0;
   float
     rngx = B.max.x - B.min.x,
-    sclx = gamut/rngx,
+    sclx = gamut / rngx,
     rngy = B.max.y - B.min.y,
-    scly = gamut/rngy;
+    scly = gamut / rngy;
 
   fit(a, na, ipa, 0, sclx, scly, mid, B);
   fit(b, nb, ipb, 2, sclx, scly, mid, B);
 
   double ascale = (double)sclx * (double)scly;
-
   int64_t s = 0;
 
   for (size_t j = 0 ; j < na ; ++j)
@@ -266,7 +272,7 @@ extern float pia_area(point_t* a, size_t na,
 		a1 = -area(ipa[j].ip, ipb[k].ip, ipb[k+1].ip),
 		a2 =  area(ipa[j+1].ip, ipb[k].ip, ipb[k+1].ip);
 
-	      int16_t o = (a1<0);
+	      bool o = (a1<0);
 
 	      if (o == (a2<0))
 		{
@@ -276,7 +282,7 @@ extern float pia_area(point_t* a, size_t na,
 
 		  if ((a3<0) == (a4<0))
 		    {
-		      if(o)
+		      if (o)
 			cross(ipa+j, ipa+j+1, ipb+k, ipb+k+1, a1, a2, a3, a4, &s);
 		      else
 			cross(ipb+k, ipb+k+1, ipa+j, ipa+j+1, a3, a4, a1, a2, &s);
@@ -289,5 +295,5 @@ extern float pia_area(point_t* a, size_t na,
   inness(ipa, na, ipb, nb, &s);
   inness(ipb, nb, ipa, na, &s);
 
-  return s/ascale;
+  return s / ascale;
 }
