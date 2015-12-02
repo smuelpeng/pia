@@ -15,7 +15,7 @@
 
     http://www.cap-lore.com/MathPhys/IP/
 
-  which is clearly a master-work of algorithmics and coding. My original
+  and is clearly a master-work of algorithmics and coding. My original
   intention was simply to convert it ANSI C, but I found that I needed
   to reformat and "dumb it down" just so that I could understand what
   it was that I was converting.
@@ -45,8 +45,8 @@
 
 #include "pia.h"
 
-#include <stdio.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <float.h>
 
 typedef struct
@@ -54,23 +54,21 @@ typedef struct
   point_t min, max;
 } box_t;
 
-typedef long long hp_t;
-
 typedef struct
 {
-  long x, y;
+  int32_t x, y;
 } ipoint_t;
 
 typedef struct
 {
-  long mn, mx;
+  int32_t mn, mx;
 } rng_t;
 
 typedef struct
 {
   ipoint_t ip;
   rng_t rx, ry;
-  short in;
+  int16_t in;
 } vertex_t;
 
 static void bd(float *X, float y)
@@ -83,7 +81,7 @@ static void bu(float *X, float y)
   *X = (*X>y ? *X : y);
 }
 
-static void range(point_t *x, int c, box_t *B)
+static void range(point_t *x, size_t c, box_t *B)
 {
   while (c--)
     {
@@ -94,13 +92,13 @@ static void range(point_t *x, int c, box_t *B)
     }
 }
 
-static hp_t area(ipoint_t a, ipoint_t p, ipoint_t q)
+static int64_t area(ipoint_t a, ipoint_t p, ipoint_t q)
 {
   return
-    (hp_t)p.x*q.y -
-    (hp_t)p.y*q.x +
-    (hp_t)a.x*(p.y - q.y) +
-    (hp_t)a.y*(q.x - p.x);
+    (int64_t)p.x*q.y -
+    (int64_t)p.y*q.x +
+    (int64_t)a.x*(p.y - q.y) +
+    (int64_t)a.y*(q.x - p.x);
 }
 
 /* a*b + c calculated using doubles */
@@ -124,27 +122,27 @@ static float dma(float a, float b, float c)
 */
 
 __attribute__ ((noinline))
-static void fit(point_t *x, int cx,
+static void fit(point_t *x, size_t cx,
 		vertex_t *ix,
-		int fudge,
+		int32_t fudge,
 		float sclx,
 		float scly,
 		float mid,
 		box_t B)
 {
-  int c;
+  int32_t c;
 
   c = cx;
 
   while (c--)
     {
       ix[c].ip.x =
-	((long)dma(x[c].x - B.min.x, sclx, -mid) & ~7) |
+	((int32_t)dma(x[c].x - B.min.x, sclx, -mid) & ~7) |
 	fudge |
 	(c & 1);
 
       ix[c].ip.y =
-	((long)dma(x[c].y - B.min.y, scly, -mid) & ~7) |
+	((int32_t)dma(x[c].y - B.min.y, scly, -mid) & ~7) |
 	fudge;
     }
 
@@ -169,9 +167,9 @@ static void fit(point_t *x, int cx,
     }
 }
 
-static void contrib(ipoint_t f, ipoint_t t, short w, hp_t *s)
+static void contrib(ipoint_t f, ipoint_t t, int16_t w, int64_t *s)
 {
-  *s += (hp_t)w*(t.x - f.x)*(t.y + f.y)/2;
+  *s += (int64_t)w*(t.x - f.x)*(t.y + f.y)/2;
 }
 
 static int ovl(rng_t p, rng_t q)
@@ -187,7 +185,7 @@ void cross(vertex_t *a,
 	   double a2,
 	   double a3,
 	   double a4,
-	   hp_t *s)
+	   int64_t *s)
 {
   float
     r1 = a1/((float)a1 + a2),
@@ -205,9 +203,11 @@ void cross(vertex_t *a,
   --c->in;
 }
 
-static void inness(vertex_t *P, int cP, vertex_t * Q, int cQ, hp_t *s)
+static void inness(vertex_t *P, size_t cP,
+		   vertex_t *Q, size_t cQ, int64_t *s)
 {
-  int S = 0, c = cQ;
+  int16_t S = 0;
+  size_t c = cQ;
   ipoint_t p = P[0].ip;
 
   while (c--)
@@ -220,9 +220,7 @@ static void inness(vertex_t *P, int cP, vertex_t * Q, int cQ, hp_t *s)
 	}
     }
 
-  int j;
-
-  for (j=0 ; j<cP ; ++j)
+  for (size_t j = 0 ; j < cP ; ++j)
     {
       if (S)
 	contrib(P[j].ip, P[j+1].ip, S, s);
@@ -231,10 +229,9 @@ static void inness(vertex_t *P, int cP, vertex_t * Q, int cQ, hp_t *s)
 }
 
 extern float pia_area(point_t* a, size_t na,
-			    point_t* b, size_t nb)
+		      point_t* b, size_t nb)
 {
   vertex_t ipa[na+1], ipb[nb+1];
-  double ascale;
   box_t B = {{ FLT_MAX,  FLT_MAX},
 	     {-FLT_MAX, -FLT_MAX}};
 
@@ -255,25 +252,25 @@ extern float pia_area(point_t* a, size_t na,
   fit(a, na, ipa, 0, sclx, scly, mid, B);
   fit(b, nb, ipb, 2, sclx, scly, mid, B);
 
-  ascale = (double)sclx * (double)scly;
+  double ascale = (double)sclx * (double)scly;
 
-  hp_t s = 0; int j, k;
+  int64_t s = 0;
 
-  for (j=0 ; j<na ; ++j)
+  for (size_t j = 0 ; j < na ; ++j)
     {
-      for (k=0 ; k<nb ; ++k)
+      for (size_t k = 0 ; k < nb ; ++k)
 	{
 	  if ( ovl(ipa[j].rx, ipb[k].rx) && ovl(ipa[j].ry, ipb[k].ry) )
 	    {
-	      hp_t
+	      int64_t
 		a1 = -area(ipa[j].ip, ipb[k].ip, ipb[k+1].ip),
 		a2 =  area(ipa[j+1].ip, ipb[k].ip, ipb[k+1].ip);
 
-	      int o = (a1<0);
+	      int16_t o = (a1<0);
 
 	      if (o == (a2<0))
 		{
-		  hp_t
+		  int64_t
 		    a3 = area(ipb[k].ip, ipa[j].ip, ipa[j+1].ip),
 		    a4 = -area(ipb[k+1].ip, ipa[j].ip, ipa[j+1].ip);
 
