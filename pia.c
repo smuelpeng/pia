@@ -1,5 +1,5 @@
 /*
-  pia.h
+  pia.c
 
   Calculate the area of intersection of a pair of polygons specifed
   as and array of pairs of floats representing the polygon vertices.
@@ -15,10 +15,10 @@
 
     http://www.cap-lore.com/MathPhys/IP/
 
-  It is clearly a work of genius, but rather too dense for mere mortals
-  like me to understand.  My original intention was simply to convert
-  it ANSI C, but I found that I needed to reformat and "dumb it down"
-  just so that I could understand what it was that I was converting.
+  which is clearly a master-work of algorithmics and coding. My original
+  intention was simply to convert it ANSI C, but I found that I needed
+  to reformat and "dumb it down" just so that I could understand what
+  it was that I was converting.
 
   The main changes are:
 
@@ -31,13 +31,16 @@
     precedence
   - removed scope restraining blocks
   - lots of stylistic changes
+  - some assumptions about the promotion of floats to doubles for
+    intermediate calculation have been made explicit (these assumptions
+    are true for gcc on x86, but are not guaranteed by standard and are
+    false for gcc on amd64)
 
-  This is now ANSI C (according to gcc -Wall -ansi)
+  This is now C99 (according to gcc -Wall -std=c99)
 
   --------
 
-  J.J. Green 2010
-  $Id$
+  J.J. Green 2010, 2015
 */
 
 #include "pia.h"
@@ -107,6 +110,20 @@ static float dma(float a, float b, float c)
   return (double)a * (double)b + (double)c;
 }
 
+/*
+  The allowing this function to be inlined cause a unit-test
+  failure (the 'cross' test) for gcc 4.4.7 on x86 Linux, I'm
+  not sure why, possibly a gcc bug?  According to Torvalds
+  (2008)
+
+    older versions of gcc (and by "older" I do not mean "really
+    ancient" or "deprecated", but stuff that is still in use) are
+    known to be total and utter crap when it comes to inlining
+
+  http://yarchive.net/comp/linux/gcc_inline.html
+*/
+
+__attribute__ ((noinline))
 static void fit(point_t *x, int cx,
 		vertex_t *ix,
 		int fudge,
@@ -176,12 +193,12 @@ void cross(vertex_t *a,
     r1 = a1/((float)a1 + a2),
     r2 = a3/((float)a3 + a4);
 
-  ipoint_t pA = {a->ip.x + ((double)r1)*(b->ip.x - a->ip.x),
-		 a->ip.y + ((double)r1)*(b->ip.y - a->ip.y)};
+  ipoint_t pA = {a->ip.x + r1*(b->ip.x - a->ip.x),
+		 a->ip.y + r1*(b->ip.y - a->ip.y)};
   contrib(pA, b->ip, 1, s);
 
-  ipoint_t pB = {c->ip.x + ((double)r2)*(d->ip.x - c->ip.x),
-		 c->ip.y + ((double)r2)*(d->ip.y - c->ip.y)};
+  ipoint_t pB = {c->ip.x + r2*(d->ip.x - c->ip.x),
+		 c->ip.y + r2*(d->ip.y - c->ip.y)};
   contrib(d->ip, pB, 1, s);
 
   ++a->in;
