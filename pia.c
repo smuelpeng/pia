@@ -42,6 +42,7 @@
 
 #include "pia.h"
 
+#include <stdio.h>
 #include <stddef.h>
 #include <float.h>
 
@@ -153,7 +154,7 @@ static void fit(point_t *x, int cx,
 
 static void contrib(ipoint_t f, ipoint_t t, short w, hp_t *s)
 {
-  *s += (hp_t)w*(t.x-f.x)*(t.y+f.y)/2;
+  *s += (hp_t)w*(t.x - f.x)*(t.y + f.y)/2;
 }
 
 static int ovl(rng_t p, rng_t q)
@@ -161,10 +162,10 @@ static int ovl(rng_t p, rng_t q)
   return (p.mn < q.mx) && (q.mn < p.mx);
 }
 
-void cross(vertex_t * a,
-	   vertex_t * b,
-	   vertex_t * c,
-	   vertex_t * d,
+void cross(vertex_t *a,
+	   vertex_t *b,
+	   vertex_t *c,
+	   vertex_t *d,
 	   double a1,
 	   double a2,
 	   double a3,
@@ -175,15 +176,13 @@ void cross(vertex_t * a,
     r1 = a1/((float)a1 + a2),
     r2 = a3/((float)a3 + a4);
 
-  contrib((ipoint_t){a->ip.x + r1*(b->ip.x - a->ip.x), a->ip.y + r1*(b->ip.y - a->ip.y)},
-	  b->ip,
-	  1,
-	  s);
+  ipoint_t pA = {a->ip.x + ((double)r1)*(b->ip.x - a->ip.x),
+		 a->ip.y + ((double)r1)*(b->ip.y - a->ip.y)};
+  contrib(pA, b->ip, 1, s);
 
-  contrib(d->ip,
-	  (ipoint_t){c->ip.x + r2*(d->ip.x - c->ip.x), c->ip.y + r2*(d->ip.y - c->ip.y)},
-	  1,
-	  s);
+  ipoint_t pB = {c->ip.x + ((double)r2)*(d->ip.x - c->ip.x),
+		 c->ip.y + ((double)r2)*(d->ip.y - c->ip.y)};
+  contrib(d->ip, pB, 1, s);
 
   ++a->in;
   --c->in;
@@ -210,7 +209,6 @@ static void inness(vertex_t *P, int cP, vertex_t * Q, int cQ, hp_t *s)
     {
       if (S)
 	contrib(P[j].ip, P[j+1].ip, S, s);
-
       S += P[j].in;
     }
 }
@@ -240,7 +238,7 @@ extern float pia_area(point_t* a, size_t na,
   fit(a, na, ipa, 0, sclx, scly, mid, B);
   fit(b, nb, ipb, 2, sclx, scly, mid, B);
 
-  ascale = sclx*scly;
+  ascale = (double)sclx * (double)scly;
 
   hp_t s = 0; int j, k;
 
