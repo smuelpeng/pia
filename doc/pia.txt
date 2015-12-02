@@ -1,0 +1,32 @@
+Name
+
+   pia — calculate the area of intersection of polygons
+
+Synopsis
+
+#include <pia.h>
+
+   float pia_area ( point_t a,
+                    size_t na,
+                    point_t b,
+                    size_t nb);
+
+DESCRIPTION
+
+   When passed a pair of polygons, specified as arrays of point_t (and
+   their lengths), calculates their area of intersection.
+
+   The method of calculation reduces the area integration to a boundary
+   integration using Green's theorem; this is the same principle as is
+   used in the planimeter.
+
+RETURN VALUE
+
+   Returns the area of intersection of the polygons as a float.
+
+AUTHORS
+
+   The design of the algorithm and its implementation for GCC is due to
+   Norman Hardy (see Hardy's Cap Lore site for further details).
+
+   This implementation in C99 is by J.J. Green.

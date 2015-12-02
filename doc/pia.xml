@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+  "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id='pia3'>
+
+<refentryinfo><date>2015-12-01</date></refentryinfo>
+<refmeta>
+  <refentrytitle>PIA</refentrytitle>
+  <manvolnum>3</manvolnum>
+  <refmiscinfo class='manual'>Library Functions Manual</refmiscinfo>
+  <refmiscinfo class='source'>pia</refmiscinfo>
+  <refmiscinfo class='date'>2015-12-01</refmiscinfo>
+</refmeta>
+
+<refnamediv id='name'>
+  <refname>pia</refname>
+  <refpurpose>
+    calculate the area of intersection of polygons
+  </refpurpose>
+</refnamediv>
+
+<refsynopsisdiv id='synopsis'>
+
+<funcsynopsis>
+<funcsynopsisinfo>
+#include &lt;pia.h&gt;
+</funcsynopsisinfo>
+
+<funcprototype>
+  <?dbhtml funcsynopsis-style='ansi'?>
+  <funcdef>float
+  <function>
+    pia_area
+  </function>
+  </funcdef>
+  <paramdef>point_t <parameter>a</parameter></paramdef>
+  <paramdef>size_t <parameter>na</parameter></paramdef>
+  <paramdef>point_t <parameter>b</parameter></paramdef>
+  <paramdef>size_t <parameter>nb</parameter></paramdef>
+</funcprototype>
+
+</funcsynopsis>
+
+</refsynopsisdiv>
+
+<refsect1 id='description'>
+
+  <title>DESCRIPTION</title>
+
+  <para>
+    When passed a pair of polygons, specified as arrays of
+    <type>point_t</type> (and their lengths), calculates
+    their area of intersection.
+  </para>
+
+  <para>
+    The method of calculation reduces the area integration to
+    a boundary integration using Green's theorem; this is the
+    same principle as is used in the planimeter.
+  </para>
+
+</refsect1>
+
+<refsect1 id='return_value'>
+
+  <title>RETURN VALUE</title>
+
+  <para>
+    Returns the area of intersection of the polygons as a float.
+  </para>
+
+</refsect1>
+
+<refsect1 id='author'>
+  <title>AUTHORS</title>
+
+  <para>
+    The design of the algorithm and its implementation for GCC
+    is due to Norman Hardy (see Hardy's
+    <ulink
+	url="http://www.cap-lore.com/MathPhys/IP/"
+	><citetitle>Cap Lore</citetitle></ulink>
+    site for further details).
+  </para>
+
+  <para>
+    This implementation in C99 is by J.J. Green.
+  </para>
+</refsect1>
+
+</refentry>
