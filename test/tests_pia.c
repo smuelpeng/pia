@@ -1,10 +1,6 @@
 /*
   tests_example.h
   Copyright (c) J.J. Green 2015
-
-  This is the same as the test-suite included in the original
-  aip.c, and like it tests that the obtained results are
-  exact to float precision.
 */
 
 #include <pia.h>
@@ -21,8 +17,15 @@ CU_TestInfo tests_pia[] =
     {"cross", test_pia_cross},
     {"drop shadow", test_pia_drop_shadow},
     {"rectangle-in-rectangle", test_pia_rect_in_rect},
+    {"degenerate cases", test_pia_degenerate},
     CU_TEST_INFO_NULL,
   };
+
+/*
+  These is the same as the test-suite included in the original
+  aip.c, and like it tests that the obtained results are exact
+  to float precision.
+*/
 
 extern void test_pia_self(void)
 {
@@ -135,4 +138,24 @@ extern void test_pia_rect_in_rect(void)
   float area = pia_area(a, na, b, nb);
 
   CU_ASSERT_EQUAL(area, 1.0f);
+}
+
+/*
+  Here a is a diagonal line segment (folded back on itself),
+  so has area 0, so its intersetion with anything is
+  zero.
+*/
+
+extern void test_pia_degenerate(void)
+{
+  point_t
+    a[] = {{0, 0}, {3, 3}},
+    b[] = {{1, 1}, {1, 2}, {2, 2}, {2, 1}};
+  size_t
+    na = sizeof(a)/sizeof(point_t),
+    nb = sizeof(b)/sizeof(point_t);
+
+  CU_ASSERT_EQUAL(pia_area(a, na, a, na), 0.0f);
+  CU_ASSERT_EQUAL(pia_area(a, na, b, nb), 0.0f);
+  CU_ASSERT_EQUAL(pia_area(b, nb, a, na), 0.0f);
 }

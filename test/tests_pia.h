@@ -20,5 +20,6 @@ extern void test_pia_half_rect(void);
 extern void test_pia_cross(void);
 extern void test_pia_drop_shadow(void);
 extern void test_pia_rect_in_rect(void);
+extern void test_pia_degenerate(void);
 
 #endif
