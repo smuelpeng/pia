@@ -18,6 +18,7 @@ CU_TestInfo tests_pia[] =
     {"drop shadow", test_pia_drop_shadow},
     {"rectangle-in-rectangle", test_pia_rect_in_rect},
     {"degenerate cases", test_pia_degenerate},
+    {"zero size, NULL pointer", test_pia_null},
     CU_TEST_INFO_NULL,
   };
 
@@ -142,8 +143,7 @@ extern void test_pia_rect_in_rect(void)
 
 /*
   Here a is a diagonal line segment (folded back on itself),
-  so has area 0, so its intersetion with anything is
-  zero.
+  so has area 0, so its intersetion with anything is zero.
 */
 
 extern void test_pia_degenerate(void)
@@ -158,4 +158,23 @@ extern void test_pia_degenerate(void)
   CU_ASSERT_EQUAL(pia_area(a, na, a, na), 0.0f);
   CU_ASSERT_EQUAL(pia_area(a, na, b, nb), 0.0f);
   CU_ASSERT_EQUAL(pia_area(b, nb, a, na), 0.0f);
+}
+
+/*
+  if one or both of the arrays are NULL, but with the
+  size specified zero, then the return value is zero
+  (and there is no dereference of the pointer, so no
+  segfault
+*/
+
+extern void test_pia_null(void)
+{
+  point_t
+    a[] = {{1, 1}, {1, 2}, {2, 2}, {2, 1}};
+  size_t
+    na = sizeof(a)/sizeof(point_t);
+
+  CU_ASSERT_EQUAL(pia_area(a, na, NULL, 0), 0.0f);
+  CU_ASSERT_EQUAL(pia_area(NULL, 0, a, na), 0.0f);
+  CU_ASSERT_EQUAL(pia_area(NULL, 0, NULL, 0), 0.0f);
 }
