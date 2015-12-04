@@ -21,6 +21,6 @@ typedef struct
   float x, y;
 } point_t;
 
-extern float pia_area(point_t*, size_t, point_t*, size_t);
+extern float pia_area(const point_t*, size_t, const point_t*, size_t);
 
 #endif

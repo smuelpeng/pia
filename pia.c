@@ -84,7 +84,7 @@ static void bu(float *X, float y)
   *X = (*X>y ? *X : y);
 }
 
-static void range(point_t *x, size_t c, box_t *B)
+static void range(const point_t *x, size_t c, box_t *B)
 {
   while (c--)
     {
@@ -124,7 +124,7 @@ static float dma(double a, double b, double c)
 */
 
 __attribute__ ((noinline))
-static void fit(point_t *x, size_t cx,
+static void fit(const point_t *x, size_t cx,
 		vertex_t *ix,
 		int32_t fudge,
 		float sclx,
@@ -177,10 +177,8 @@ static bool ovl(rng_t p, rng_t q)
   return (p.mn < q.mx) && (q.mn < p.mx);
 }
 
-void cross(vertex_t *a,
-	   vertex_t *b,
-	   vertex_t *c,
-	   vertex_t *d,
+void cross(vertex_t *a, const vertex_t *b,
+	   vertex_t *c, const vertex_t *d,
 	   double a1,
 	   double a2,
 	   double a3,
@@ -207,8 +205,8 @@ void cross(vertex_t *a,
   --c->in;
 }
 
-static void inness(vertex_t *P, size_t cP,
-		   vertex_t *Q, size_t cQ,
+static void inness(const vertex_t *P, size_t cP,
+		   const vertex_t *Q, size_t cQ,
 		   int64_t *s)
 {
   int16_t S = 0;
@@ -235,8 +233,8 @@ static void inness(vertex_t *P, size_t cP,
     }
 }
 
-extern float pia_area(point_t *a, size_t na,
-		      point_t *b, size_t nb)
+extern float pia_area(const point_t *a, size_t na,
+		      const point_t *b, size_t nb)
 {
   if ( (na < 3) || (nb < 3) ) return 0.0;
 

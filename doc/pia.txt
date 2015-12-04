@@ -6,9 +6,9 @@ Synopsis
 
 #include <pia.h>
 
-   float pia_area ( point_t a,
+   float pia_area ( const point_t a,
                     size_t na,
-                    point_t b,
+                    const point_t b,
                     size_t nb);
 
 DESCRIPTION
