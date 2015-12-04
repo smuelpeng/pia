@@ -34,9 +34,9 @@
     pia_area
   </function>
   </funcdef>
-  <paramdef>const point_t <parameter>a</parameter></paramdef>
+  <paramdef>const point_t *<parameter>a</parameter></paramdef>
   <paramdef>size_t <parameter>na</parameter></paramdef>
-  <paramdef>const point_t <parameter>b</parameter></paramdef>
+  <paramdef>const point_t *<parameter>b</parameter></paramdef>
   <paramdef>size_t <parameter>nb</parameter></paramdef>
 </funcprototype>
 
