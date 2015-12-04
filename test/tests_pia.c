@@ -164,7 +164,7 @@ extern void test_pia_degenerate(void)
   if one or both of the arrays are NULL, but with the
   size specified zero, then the return value is zero
   (and there is no dereference of the pointer, so no
-  segfault
+  segfault)
 */
 
 extern void test_pia_null(void)
