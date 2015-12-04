@@ -106,16 +106,15 @@ static int64_t area(ipoint_t a, ipoint_t p, ipoint_t q)
 
 /* a*b + c calculated using doubles */
 
-static float dma(float a, float b, float c)
+static float dma(double a, double b, double c)
 {
-  return (double)a * (double)b + (double)c;
+  return a*b + c;
 }
 
 /*
-  The allowing this function to be inlined cause a unit-test
-  failure (the 'cross' test) for gcc 4.4.7 on x86 Linux, I'm
-  not sure why, possibly a gcc bug?  According to Torvalds
-  (2008)
+  The allowing of this function to be inlined causes a unit-test
+  failure (the 'cross' test) for gcc 4.4.7 on x86 Linux, I'm not
+  sure why, possibly a gcc bug?  According to Torvalds (2008)
 
     older versions of gcc (and by "older" I do not mean "really
     ancient" or "deprecated", but stuff that is still in use) are
@@ -209,21 +208,22 @@ void cross(vertex_t *a,
 }
 
 static void inness(vertex_t *P, size_t cP,
-		   vertex_t *Q, size_t cQ, int64_t *s)
+		   vertex_t *Q, size_t cQ,
+		   int64_t *s)
 {
   int16_t S = 0;
   size_t c = cQ;
-  ipoint_t p = P[0].ip;
 
   while (c--)
     {
+      ipoint_t p = P[0].ip;
+
       if ((Q[c].rx.mn < p.x) && (p.x < Q[c].rx.mx))
 	{
 	  bool positive = (0 < area(p, Q[c].ip, Q[c+1].ip));
 
-	  S += ((positive != (Q[c].ip.x < Q[c+1].ip.x)) ?
-		0 :
-		(positive ? -1 : 1));
+	  if (positive == (Q[c].ip.x < Q[c+1].ip.x))
+	    S += (positive ? -1 : 1);
 	}
     }
 
@@ -238,11 +238,10 @@ static void inness(vertex_t *P, size_t cP,
 extern float pia_area(point_t *a, size_t na,
 		      point_t *b, size_t nb)
 {
-  vertex_t ipa[na+1], ipb[nb+1];
+  if ( (na < 3) || (nb < 3) ) return 0.0;
+
   box_t B = {{ FLT_MAX,  FLT_MAX},
 	     {-FLT_MAX, -FLT_MAX}};
-
-  if ( (na < 3) || (nb < 3) ) return 0.0;
 
   range(a, na, &B);
   range(b, nb, &B);
@@ -255,6 +254,7 @@ extern float pia_area(point_t *a, size_t na,
     sclx = gamut / rngx,
     rngy = B.max.y - B.min.y,
     scly = gamut / rngy;
+  vertex_t ipa[na+1], ipb[nb+1];
 
   fit(a, na, ipa, 0, sclx, scly, mid, B);
   fit(b, nb, ipb, 2, sclx, scly, mid, B);
