@@ -14,13 +14,18 @@
 #ifndef PIA_H
 #define PIA_H
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stddef.h>
 
-typedef struct
-{
-  float x, y;
-} point_t;
+  typedef struct { float x, y; } point_t;
+  extern float pia_area(const point_t*, size_t, const point_t*, size_t);
 
-extern float pia_area(const point_t*, size_t, const point_t*, size_t);
+#ifdef __cplusplus
+}
+#endif
 
 #endif
