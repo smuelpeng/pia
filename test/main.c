@@ -27,8 +27,13 @@ int main(void)
   tests_load();
   CU_basic_set_mode(mode);
   CU_set_error_action(error_action);
-  printf("\nSuite returned %d.\n", CU_basic_run_tests());
-  CU_cleanup_registry();
 
-  return (CU_get_number_of_failures() > 0 ? EXIT_FAILURE : EXIT_SUCCESS);
+  int
+    status = CU_basic_run_tests(),
+    nfail = CU_get_number_of_failures();
+
+  CU_cleanup_registry();
+  printf("\nSuite returned %d.\n", status);
+
+  return (nfail > 0 ? EXIT_FAILURE : EXIT_SUCCESS);
 }
