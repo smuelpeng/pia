@@ -18,3 +18,4 @@ x86 and amd64 architectures with `-O3 -std=c99`.
 
 [![Build Status](https://travis-ci.org/jjgreen/pia.png)](https://travis-ci.org/jjgreen/pia)
 [![Coverage Status](https://coveralls.io/repos/jjgreen/pia/badge.svg?branch=master)](https://coveralls.io/r/jjgreen/pia?branch=master)
+[![Coverity](https://scan.coverity.com/projects/8808/badge.svg)](https://scan.coverity.com/projects/jjgreen-pia)
