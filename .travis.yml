@@ -11,3 +11,18 @@ script :
   - CFLAGS=--coverage LDFLAGS=--coverage make --quiet test
 after_success:
   - coveralls --exclude test --gcov-options '\-lp'
+
+
+env:
+  global:
+   - secure: "c3spt0C3FBWnKIpkieL+zLHxbcH8NgbMcEtCOpsgqhfSHgXAwPgBdDGadqu5ub/YgWJ/VrSODmuBU/laSl/FwvXmG/jzkfVkNeiHDM3oJmPov7E+cwFaWC5uHxIPl8kUQbeSi77WBCOKyjF5zzE6L7Dd3zPhRivB3TNiw0tpVUPuahSbiPXEiuZt9PfZ9YDAzQgy0lEtD8ggeWsQo0LRYGeruLdpXBQ3SwY/LbMnyC54R6saemA3Hm1g7x1fycbeNppcpNOjjfAgYiTnydN4CO++JQZlD7GmV4D8FCt1H9w5Gi4/6OoNzuwMl7BIL+Jl82Adt9bdeT5NPZDxSHiTtEDaPEafTxWsgmV7bcSeXeE4UAb1XQ/bgcZfmArcscOYXE3MNlBYZj1lzOh8GKK0W+o8Nvs0RnRB5UhNs1qQBn7UX+2ylwsWG4gvHjU0R7di0MBMbULLnnqntXXVJyiQHrc+uJIYkb6mr1dsdgFTaDcCRfzq5Z5m+4GZiYCs5RO68cYkIh5vkTPSex4ptPkeI96uFV8YePuD4A587mbObFlfrxypgJyAddBsqmbUaY8nMs26dSNj+E4dIGWxfipVjEDshlksoTqtYRF/Z5kE5NGKPCl1sIWgpywSsfSeF/FZyM+OozedHHCm2ePN4B9/cvMs/12fbf+S9DrhGMG5ttA="
+
+addons:
+  coverity_scan:
+    project:
+      name: "jjgreen/pia"
+      description: "Build submitted via Travis CI"
+    notification_email: "j.j.green@gmx.co.uk"
+    build_command_prepend: "make clean"
+    build_command:   "make"
+    branch_pattern: "coverity_scan"
