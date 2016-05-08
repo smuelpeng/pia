@@ -147,7 +147,7 @@ static void fit(const point_t *x, size_t cx,
     }
 
   ix[0].ip.y += (cx & 1);
-  ix[cx] = ix[0];
+  ix[cx].ip = ix[0].ip;
 
   c = cx;
 
