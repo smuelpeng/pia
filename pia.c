@@ -1,41 +1,41 @@
 /*
   pia.c
 
-  Calculate the area of intersection of a pair of polygons specifed
+  Calculate the area of intersection of a pair of polygons specified
   as and array of pairs of floats representing the polygon vertices.
   The return value is a float and accurate to float precision.
-  Degenerate cases are avoided by working in exact arthmetic and
+  Degenerate cases are avoided by working in exact arithmetic and
   "fudging" the exact coordinates to an extent smaller than float
   precision.
 
   -------
 
   This code is a derived from Norman Hardy's aip.c which can be
-  downoaded from
+  downloaded from
 
     http://www.cap-lore.com/MathPhys/IP/
 
-  and is clearly a master-work of algorithmics and craftmanship. My
-  original intention was simply to convert it ANSI C, but I found that
-  I needed to reformat and "dumb it down" just so that I could
-  understand what it was that I was converting.
+  In my view, an astonishing piece of algorithmic craftsmanship.
+
+  My original intention was simply to convert it ANSI C (C89 at the
+  time), but I found that I needed to reformat and "dumb it down"
+  just so that I could understand what it was that I was converting.
 
   The main changes are:
 
   - renamed to pia.c to avoid any confusion with the original
   - added header file
   - renamed types *_t
-  - pulled all nested function out, passing required
-    variables by reference as needed
-  - added lots of unnecessary parentheses to emphasis
-    precedence
+  - pulled all nested function out, passing required variables by
+    reference as needed
+  - added lots of unnecessary parentheses to emphasis precedence
   - removed scope restraining blocks
   - lots of stylistic changes
   - some assumptions about the promotion of floats to doubles for
     intermediate calculation have been made explicit (these assumptions
     are true for gcc on x86, but are not guaranteed by standard and are
     false for gcc on amd64)
-  - use integer types with explict size from stdint.h, use size_t for
+  - use integer types with explicit size from stdint.h, use size_t for
     array indices, used booleans from stdbool.h
 
   This is now C99 (according to gcc -Wall -std=c99)
@@ -44,6 +44,10 @@
 
   J.J. Green 2010, 2015
 */
+
+#define GCC_VERSION (__GNUC__ * 10000 \
+		     + __GNUC_MINOR__ * 100 \
+		     + __GNUC_PATCHLEVEL__)
 
 #include "pia.h"
 
@@ -104,26 +108,22 @@ static int64_t area(ipoint_t a, ipoint_t p, ipoint_t q)
     (int64_t)a.y*(q.x - p.x);
 }
 
-/* a*b + c calculated using doubles */
-
 static float dma(double a, double b, double c)
 {
   return a*b + c;
 }
 
 /*
-  The allowing of this function to be inlined causes a unit-test
-  failure (the 'cross' test) for gcc 4.4.7 on x86 Linux, I'm not
-  sure why, possibly a gcc bug?  According to Torvalds (2008)
+  Allowing this function to be inlined causes a unit-test failure (the
+  'cross' test) for gcc 4.4.7 on x86 Linux, I'm not sure why, possibly
+  a gcc bug?
 
-    older versions of gcc (and by "older" I do not mean "really
-    ancient" or "deprecated", but stuff that is still in use) are
-    known to be total and utter crap when it comes to inlining
-
-  http://yarchive.net/comp/linux/gcc_inline.html
+  12/2016, I find that this issue is not present in gcc 4.9.2
 */
 
+#if GCC_VERSION < 40902
 __attribute__ ((noinline))
+#endif
 static void fit(const point_t *x, size_t cx,
 		vertex_t *ix,
 		int32_t fudge,
