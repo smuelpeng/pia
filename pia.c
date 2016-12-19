@@ -118,7 +118,9 @@ static float dma(double a, double b, double c)
   'cross' test) for gcc 4.4.7 on x86 Linux, I'm not sure why, possibly
   a gcc bug?
 
-  12/2016, I find that this issue is not present in gcc 4.9.2
+  19/12/2016, I find that this issue is not present in gcc 4.9.2, so
+  this suppression of inlining is restricted to versions earlier than
+  this.
 */
 
 #if GCC_VERSION < 40902
@@ -177,13 +179,13 @@ static bool ovl(rng_t p, rng_t q)
   return (p.mn < q.mx) && (q.mn < p.mx);
 }
 
-void cross(vertex_t *a, const vertex_t *b,
-	   vertex_t *c, const vertex_t *d,
-	   double a1,
-	   double a2,
-	   double a3,
-	   double a4,
-	   int64_t *s)
+static void cross(vertex_t *a, const vertex_t *b,
+		  vertex_t *c, const vertex_t *d,
+		  double a1,
+		  double a2,
+		  double a3,
+		  double a4,
+		  int64_t *s)
 {
   float
     r1 = a1/((float)a1 + a2),
