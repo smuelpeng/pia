@@ -80,12 +80,12 @@ typedef struct
 
 static void bd(float *X, float y)
 {
-  *X = (*X<y ? *X : y);
+  if (*X >= y) *X = y;
 }
 
 static void bu(float *X, float y)
 {
-  *X = (*X>y ? *X : y);
+  if (*X <= y) *X = y;
 }
 
 static void range(const point_t *x, size_t c, box_t *B)
@@ -102,15 +102,15 @@ static void range(const point_t *x, size_t c, box_t *B)
 static int64_t area(ipoint_t a, ipoint_t p, ipoint_t q)
 {
   return
-    (int64_t)p.x*q.y -
-    (int64_t)p.y*q.x +
-    (int64_t)a.x*(p.y - q.y) +
-    (int64_t)a.y*(q.x - p.x);
+    (int64_t)p.x * q.y -
+    (int64_t)p.y * q.x +
+    (int64_t)a.x * (p.y - q.y) +
+    (int64_t)a.y * (q.x - p.x);
 }
 
 static float dma(double a, double b, double c)
 {
-  return a*b + c;
+  return a * b + c;
 }
 
 /*
@@ -139,13 +139,13 @@ static void fit(const point_t *x, size_t cx,
   while (c--)
     {
       ix[c].ip.x =
-	((int32_t)dma(x[c].x - B.min.x, sclx, -mid) & ~7) |
-	fudge |
-	(c & 1);
+	((int32_t)dma(x[c].x - B.min.x, sclx, -mid) & ~7)
+	| fudge
+	| (c & 1);
 
       ix[c].ip.y =
-	((int32_t)dma(x[c].y - B.min.y, scly, -mid) & ~7) |
-	fudge;
+	((int32_t)dma(x[c].y - B.min.y, scly, -mid) & ~7)
+	| fudge;
     }
 
   ix[0].ip.y += (cx & 1);
@@ -155,15 +155,15 @@ static void fit(const point_t *x, size_t cx,
 
   while (c--)
     {
-      ix[c].rx =
-	(ix[c].ip.x < ix[c+1].ip.x) ?
-	((rng_t){ix[c].ip.x, ix[c+1].ip.x}) :
-	((rng_t){ix[c+1].ip.x, ix[c].ip.x});
+      if (ix[c].ip.x < ix[c + 1].ip.x)
+	ix[c].rx = (rng_t){ix[c].ip.x, ix[c + 1].ip.x};
+      else
+	ix[c].rx = (rng_t){ix[c + 1].ip.x, ix[c].ip.x};
 
-      ix[c].ry =
-	(ix[c].ip.y < ix[c+1].ip.y) ?
-	((rng_t){ix[c].ip.y, ix[c+1].ip.y}) :
-	((rng_t){ix[c+1].ip.y, ix[c].ip.y});
+      if (ix[c].ip.y < ix[c + 1].ip.y)
+	ix[c].ry = (rng_t){ix[c].ip.y, ix[c + 1].ip.y};
+      else
+	ix[c].ry = (rng_t){ix[c + 1].ip.y, ix[c].ip.y};
 
       ix[c].in = 0;
     }
@@ -171,7 +171,7 @@ static void fit(const point_t *x, size_t cx,
 
 static void contrib(ipoint_t f, ipoint_t t, int16_t w, int64_t *s)
 {
-  *s += (int64_t)w*(t.x - f.x)*(t.y + f.y)/2;
+  *s += (int64_t)w*(t.x - f.x)*(t.y + f.y) / 2;
 }
 
 static bool ovl(rng_t p, rng_t q)
@@ -188,18 +188,18 @@ static void cross(vertex_t *a, const vertex_t *b,
 		  int64_t *s)
 {
   float
-    r1 = a1/((float)a1 + a2),
-    r2 = a3/((float)a3 + a4);
+    r1 = a1 / ((float)a1 + a2),
+    r2 = a3 / ((float)a3 + a4);
 
   ipoint_t pA = {
-    a->ip.x + r1*(b->ip.x - a->ip.x),
-    a->ip.y + r1*(b->ip.y - a->ip.y)
+    a->ip.x + r1 * (b->ip.x - a->ip.x),
+    a->ip.y + r1 * (b->ip.y - a->ip.y)
   };
   contrib(pA, b->ip, 1, s);
 
   ipoint_t pB = {
-    c->ip.x + r2*(d->ip.x - c->ip.x),
-    c->ip.y + r2*(d->ip.y - c->ip.y)
+    c->ip.x + r2 * (d->ip.x - c->ip.x),
+    c->ip.y + r2 * (d->ip.y - c->ip.y)
   };
   contrib(d->ip, pB, 1, s);
 
@@ -220,9 +220,9 @@ static void inness(const vertex_t *P, size_t cP,
 
       if ((Q[c].rx.mn < p.x) && (p.x < Q[c].rx.mx))
 	{
-	  bool positive = (0 < area(p, Q[c].ip, Q[c+1].ip));
+	  bool positive = (0 < area(p, Q[c].ip, Q[c + 1].ip));
 
-	  if (positive == (Q[c].ip.x < Q[c+1].ip.x))
+	  if (positive == (Q[c].ip.x < Q[c + 1].ip.x))
 	    S += (positive ? -1 : 1);
 	}
     }
@@ -230,7 +230,7 @@ static void inness(const vertex_t *P, size_t cP,
   for (size_t j = 0 ; j < cP ; ++j)
     {
       if (S)
-	contrib(P[j].ip, P[j+1].ip, S, s);
+	contrib(P[j].ip, P[j + 1].ip, S, s);
       S += P[j].in;
     }
 }
@@ -254,7 +254,7 @@ extern float pia_area(const point_t *a, size_t na,
     sclx = gamut / rngx,
     rngy = B.max.y - B.min.y,
     scly = gamut / rngy;
-  vertex_t ipa[na+1], ipb[nb+1];
+  vertex_t ipa[na + 1], ipb[nb + 1];
 
   fit(a, na, ipa, 0, sclx, scly, mid, B);
   fit(b, nb, ipb, 2, sclx, scly, mid, B);
@@ -269,23 +269,23 @@ extern float pia_area(const point_t *a, size_t na,
 	  if ( ovl(ipa[j].rx, ipb[k].rx) && ovl(ipa[j].ry, ipb[k].ry) )
 	    {
 	      int64_t
-		a1 = -area(ipa[j].ip, ipb[k].ip, ipb[k+1].ip),
-		a2 =  area(ipa[j+1].ip, ipb[k].ip, ipb[k+1].ip);
+		a1 = -area(ipa[j].ip, ipb[k].ip, ipb[k + 1].ip),
+		a2 =  area(ipa[j + 1].ip, ipb[k].ip, ipb[k + 1].ip);
 
 	      bool o = (a1<0);
 
 	      if (o == (a2<0))
 		{
 		  int64_t
-		    a3 = area(ipb[k].ip, ipa[j].ip, ipa[j+1].ip),
-		    a4 = -area(ipb[k+1].ip, ipa[j].ip, ipa[j+1].ip);
+		    a3 = area(ipb[k].ip, ipa[j].ip, ipa[j + 1].ip),
+		    a4 = -area(ipb[k + 1].ip, ipa[j].ip, ipa[j + 1].ip);
 
 		  if ((a3<0) == (a4<0))
 		    {
 		      if (o)
-			cross(ipa+j, ipa+j+1, ipb+k, ipb+k+1, a1, a2, a3, a4, &s);
+			cross(ipa + j, ipa + j + 1, ipb + k, ipb + k + 1, a1, a2, a3, a4, &s);
 		      else
-			cross(ipb+k, ipb+k+1, ipa+j, ipa+j+1, a3, a4, a1, a2, &s);
+			cross(ipb + k, ipb + k + 1, ipa + j, ipa + j + 1, a3, a4, a1, a2, &s);
 		    }
 		}
 	    }
