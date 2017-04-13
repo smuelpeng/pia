@@ -5,5 +5,4 @@
   Copyright (c) J.J. Green 2015
 */
 
-void tests_load(void);
-
+extern void tests_load(void);

@@ -19,7 +19,7 @@ static CU_SuiteInfo suites[] =
     CU_SUITE_INFO_NULL,
   };
 
-void tests_load(void)
+extern void tests_load(void)
 {
   assert(NULL != CU_get_registry());
   assert(!CU_is_test_running());
