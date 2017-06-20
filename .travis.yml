@@ -8,10 +8,9 @@ before_install :
   - sudo pip install cpp-coveralls
 script :
   - CFLAGS=--coverage LDFLAGS=--coverage make
-  - CFLAGS=--coverage LDFLAGS=--coverage make --quiet test
+  - CFLAGS=--coverage LDFLAGS=--coverage make test
 after_success:
   - coveralls --exclude test --gcov-options '\-lp'
-
 
 env:
   global:
